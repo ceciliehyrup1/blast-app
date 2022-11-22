@@ -1,9 +1,8 @@
-import React from 'react'
 import { Player } from './Player';
 
 export class Team{
     name: string; 
-    rounds_won : number; 
+    rounds_won : string; 
     playerIDs : Array<Player>;  
     is_ct: boolean; 
 

@@ -1,18 +1,10 @@
 import React, { useEffect } from 'react'
-import { Player } from '../Player';
-import Profile from './profile'
-import PubSub from 'pubsub-js';
+import { Team } from '../Team';
+import './board.css'
 
 
-const Board: React.FC<{}> = () => {
-  const [players, setPlayers] = React.useState([]);
-
-  
-
-  
-  useEffect(() => {
-
-  })
+const Board: React.FC<{team: Team}> = (team) => {
+  let players = team.team.playerIDs.sort((playerOne, playerTwo) => playerTwo.kill_count - playerOne.kill_count)
 
   const headers = [
     {key: "name", label: "Name"},
@@ -23,28 +15,32 @@ const Board: React.FC<{}> = () => {
   ];
 
   return (
+    <div className='scoreboard-table'>
+    <h1 className='score-number'>{team.team.rounds_won}</h1>
+    <h3 className='team-name'>{team.team.name}</h3>
     <table>
       <thead>
         <tr>
           {headers.map((row) => {
-            return <td key={row.key}>{row.label}</td>; 
+            return <td className='table-headers' key={row.key}>{row.label}</td>; 
           })}
         </tr>
       </thead>
       <tbody>
-        {players.map((player) =>{
+        {Array.from(players.values()).map((player) =>{
           return(
-            <tr key={player.steamID}>
-              <td>{player.name}</td>
-              <td>{player.kill_count}</td>
-              <td>{player.death_count}</td>
-              <td>{player.get_kdr()}</td>
-              <td>{player.get_headshot_percentage()}</td>
+            <tr className='table-values' key={player.steamID}>
+              <td className='table-player-name'>{player.name}</td>
+              <td className='table-kill'>{player.kill_count}</td>
+              <td className='table-death'>{player.death_count}</td>
+              <td className='table-value'>{Math.round(player.get_kdr() * 10) / 10}</td>
+              <td className='table-value'>{Math.round(player.get_headshot_percentage() * 10) / 10}</td>
             </tr>
           )
         })}
       </tbody>
     </table>
+    </div>
   )
 }
 

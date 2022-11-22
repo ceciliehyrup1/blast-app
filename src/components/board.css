@@ -1,0 +1,33 @@
+.scoreboard-table {
+    padding: 10px;
+    border-radius: 5%;
+} 
+
+.team-name{
+    color: rgb(182, 75, 253)
+}
+
+.table-value{
+    color: rgba(255, 255, 255, 0.777);
+    text-align: end;
+    padding: 10px;
+}
+
+.score-number{
+    color: rgb(220, 220, 220);
+}
+
+.table-values{
+    color: rgba(255, 255, 255, 0.777);
+    text-align: center;
+}
+
+.table-headers{
+    color: rgba(128, 134, 255, 0.597); 
+    padding-right: 10px;
+}
+
+.table-player-name{
+    color: rgb(50, 60, 247);
+    text-align: start;
+}

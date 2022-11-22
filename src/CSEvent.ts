@@ -16,6 +16,9 @@ export class CSEvent{
         if(content.includes('STEAM USERID validated')){
             return Type.player_join;
         }
+        else if(content.includes('RoundsPlayed: 15')){
+            return Type.half_time; 
+        }
         else if(content.includes('switched')){
             return Type.join_team;
         }

@@ -1,8 +1,5 @@
-import React, { AbstractView } from 'react'
-import { TemplateExpression } from 'typescript';
 import './Team';
 import './Round';  
-import {ActiveMap} from './enum'; 
 
 export class Match{
     name: string;
@@ -16,13 +13,7 @@ export class Match{
     }
     
     updateScore(team_won : string){
-        this.score.forEach((number, key) => {
-            if(key == "TERRORIST"){
-                number++; 
-            }else if(key == "CT"){
-                number++; 
-            }
-        })
+        this.score.set(team_won, (this.score.get(team_won) + 1))
     }
 
     setTimeStart(time_start: string){

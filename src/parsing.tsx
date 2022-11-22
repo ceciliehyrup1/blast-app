@@ -1,28 +1,22 @@
-import * as fs from 'fs';
 import { Match } from './Match';
 import {Player} from './Player'; 
 import { Type } from "./enum";
 import { CSEvent } from './CSEvent';
 import { Team } from './Team';
 
-export default function Parsing() {
-
-  const file = fs.readFileSync('NAVIvsVitaGF-Nuke.txt','utf8'); 
+export default function Parsing(file: string) {
   const regex_time = /(?:[01]\d|2[0-3]):(?:[0-5]\d):(?:[0-5]\d)/; 
-
   const logLine: Array<string> = file.split('\n'); 
   let match = new Match('csgo');
   let players = new Map(); 
-  let ct_players = new Array();
-  let t_players = new Array(); 
-  let spec_players = new Array(); 
+  let ct_players = [];
+  let t_players = []; 
+  let spec_players = []; 
   let match_start: boolean = false; 
-  let teams = new Array(); 
-  let score = new Map(); 
+  let teams = []; 
+  let match_end = false; 
 
   for(let i = 0; i < logLine.length; i++){
-    
-
     let event = new CSEvent(logLine[i]); 
 
     switch(event.type){
@@ -64,24 +58,35 @@ export default function Parsing() {
           update_score_event(event.content);
           break;
         }
+        case Type.half_time:{
+          half_time_event(event.content);
+          break; 
+        }
         case Type.match_end:{
           match_end_event(event.content); 
+          match_end = true; 
           break;
         }
       }
     }
+    if(match_end === true){
+      break; 
+    }
   }
-  let playerbit = players.get(14317087);
-  console.log(playerbit.kill_count);
-  console.log(teams.length); 
-  //console.log(ct_players + " " + t_players);
-  teams.forEach((team) =>{
-    console.log(team.name)
-    console.log(team.rounds_won)
-  })
-  console.log(match.score.get("CT"));
-  console.log(match.score.get("TERRORIST"));
+  
+  return {players, match, teams}; 
 
+  function half_time_event(content: string){
+    teams.forEach((team) => {
+      if(team.is_ct){
+        team.is_ct = false; 
+        team.playerIDs = get_players_by_steamID(t_players);
+      }else{
+        team.is_ct = true; 
+        team.playerIDs = get_players_by_steamID(ct_players); 
+      }
+    })
+  }
 
   function join_team_event(content: string){
     let steamID: number = +content.match(/([0-9]{8})/)[0]; 
@@ -114,7 +119,6 @@ export default function Parsing() {
       ct_players.splice(index, 1);
     }else if(content.includes("from team <Spectator>")){
       let index = spec_players.indexOf(steamID);
-      console.log("i deleted from spec");
       spec_players.splice(index, 1);
     }
   }
@@ -125,7 +129,7 @@ export default function Parsing() {
     let exist = false; 
 
     teams.forEach((team) => {
-      if(team.name == name){
+      if(team.name === name){
         exist = true;
       }
     })
@@ -156,17 +160,15 @@ export default function Parsing() {
     let round_won_trigger = values[1]; 
     let ct_score = values[2]; 
     let t_score = values[3]; 
-
     
-    match.updateScore(round_won_team); 
     teams.forEach((team) => {
-      if(team.is_ct && round_won_team == "CT"){
-        team.rounds_won++;
-      }else if(!team.is_ct && round_won_team == "TERRORIST"){
-        team.rounds_won++; 
+      if(team.is_ct){
+        team.rounds_won = ct_score.slice(1, -1);
+      }else if(!team.is_ct){
+        team.rounds_won = t_score.slice(1, -1); 
       }
     })
-
+    
     // TODO: add the values to the sites
     // TODO: add it to the match score
 
@@ -180,11 +182,22 @@ export default function Parsing() {
 
     teams.forEach((team) => {
       if(team.is_ct){
-        team.playerIDs = ct_players; 
+        team.playerIDs = get_players_by_steamID(ct_players); 
       }else if(!team.is_ct){
-        team.playerIDs = t_players; 
+        team.playerIDs = get_players_by_steamID(t_players);
       }
     })
+  }
+
+  function get_players_by_steamID(steamIDs : Array<string>){
+    let playersFromId = [];
+    steamIDs.forEach((steamID) => {
+      if(players.has(steamID)){
+        playersFromId.push(players.get(steamID));
+      }
+    })
+
+    return playersFromId;
   }
 
   function kill_event(content: string){
